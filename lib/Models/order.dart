@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class Order {
   final int customerId;
   final DateTime orderDate;
-  final double netAmount;
+  late double netAmount;
   final List<OrderDetails> orderDetails;
 
   Order({
@@ -39,7 +39,7 @@ class Order {
 
 class OrderDetails {
   final int productId;
-  final int quantity;
+  late int quantity;
   final double totalAmount;
 
   OrderDetails({
@@ -100,33 +100,50 @@ Future<void> submitOrders({
   }
 }
 
-class OrderService {
-  final int orderId;
-  final int productId;
-  final String baseUrl;
+Future<void> updateOrders({
+  required int orderId,
+  required int customerId,
+  required String orderDate,
+  required double netAmount,
+  required List<OrderDetails> orderDetails,
+}) async {
+  final url = Uri.parse('http://localhost:5224/api/Order/UpdateOrder');
+  
+  // Prepare the request body
+  final body = jsonEncode({
+    "orderId": orderId,
+    "orderDate": orderDate,
+    "customerId": customerId,
+    "netAmount": netAmount,
+    "OrderDetails": orderDetails.map((order) => order.toJson()).toList(),
+  });
 
-  OrderService({this.baseUrl = 'http://localhost:5224/api/Order',required this.orderId,required this.productId});
-
-  Future<void> deleteProductFromOrder(int orderId, int productId) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/deleteproduct/$orderId/$productId'),
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-
-       body: jsonEncode({
-        'orderId': orderId,
-        'productId': productId,
-      }),
+  try {
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      body: body,
     );
 
     if (response.statusCode == 200) {
-      print('Product deleted successfully from the order.');
+      // Handle success
+      print('Order updated successfully');
+      print(response.body); // Optional: for debugging response
+    } else if (response.statusCode == 400) {
+      // Handle BadRequest (incorrect data like missing customer/order)
+      print('Failed to update order: Bad Request');
+      print(response.body); // Optional: for debugging response
     } else if (response.statusCode == 404) {
-      print('Product not found in the specified order.');
+      // Handle NotFound (order does not exist)
+      print('Failed to update order: Order not found');
+      print(response.body); // Optional: for debugging response
     } else {
-      throw Exception(
-          'Failed to delete product. Status code: ${response.statusCode}');
+      // Handle other status codes
+      print('Error occurred: ${response.statusCode}');
+      print(response.body); // Optional: for debugging response
     }
+  } catch (e) {
+    print('Network error occurred: $e');
+    throw Exception('Network error occurred');
   }
 }

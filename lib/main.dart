@@ -11,6 +11,8 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -25,6 +27,7 @@ class MyApp extends StatelessWidget {
         '/customer': (context) => const CustomerManagement(),
         '/product': (context) => const ProductManagement(),
         '/stock': (context) => const UpdateStock(),
+      //  '/editOrder':(context)=>const EditOrderScreen(order: order, customerId: customerId, selectedDate: selectedDate, orderDetails: orderDetails)
       },
       debugShowCheckedModeBanner: false,
     );
@@ -285,3 +288,4 @@ class ProductManagement extends StatelessWidget {
     );
   }
 }
+

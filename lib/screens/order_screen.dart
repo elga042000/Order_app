@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:order_taking_app/Models/customer.dart';
+import 'package:order_taking_app/Models/product.dart';
 import 'dart:convert';
 
 import 'package:order_taking_app/common.dart';
@@ -22,7 +24,7 @@ class _OrderScreenState extends State<OrderScreen> {
   List<Map<String, dynamic>> submittedOrders = [];
   List<Map<String, dynamic>> orderDetails = [];
   List<Map<String, dynamic>> orders = [];
-  late final OrderService orderService;
+  
 
   @override
   void didChangeDependencies() {
@@ -123,8 +125,7 @@ class _OrderScreenState extends State<OrderScreen> {
               'productId': product['productId'],
               'productName': product['productName'],
               'quantity': product['quantity'],
-              'productPrice':
-                  product['productPrice'], 
+              'productPrice': product['productPrice'],
               'calculatedTotal':
                   (double.parse(product['productPrice']) * product['quantity'])
                       .toStringAsFixed(2),
@@ -161,119 +162,6 @@ class _OrderScreenState extends State<OrderScreen> {
       );
     }
   }
-
-  void _editOrder(Map<String, dynamic> order, Map<String, dynamic> product) {
-    final TextEditingController quantityController =
-        TextEditingController(text: product['quantity'].toString());
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Edit Order"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: quantityController,
-                decoration: InputDecoration(labelText: "Quantity"),
-                keyboardType: TextInputType.number,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                int newQuantity = int.tryParse(quantityController.text) ??
-                    product['quantity'];
-                product['quantity'] = newQuantity;
-                _updateTotalAmount();
-                Navigator.of(context).pop();
-                setState(() {});
-              },
-              child: Text("Save"),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // void _deleteOrder(
-  //     Map<String, dynamic> order, Map<String, dynamic> product) async {
-  //   int? orderId = order['orderId'];
-  //   int? productId = product['productId'];
-  //   print(
-  //       'Attempting to delete product with ID: $productId from order with ID: $orderId');
-  //   if (orderId == null || productId == null) {
-  //     print('Error: Order ID or Product ID is null');
-  //     return;
-  //   }
-  //   bool? confirmDelete = await showDialog<bool>(
-  //     context: context,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         title: const Text("Confirm Deletion"),
-  //         content: const Text("Are you sure you want to delete this order?"),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () => Navigator.of(context).pop(true),
-  //             child: const Text("Yes"),
-  //           ),
-  //           TextButton(
-  //             onPressed: () => Navigator.of(context).pop(false),
-  //             child: const Text("No"),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-
-  //   if (confirmDelete == true) {
-  //     try {
-  //       await orderService.deleteProductFromOrder(orderId, productId);
-
-  //       setState(() {
-  //         order['products'].remove(product);
-  //         if (order['products'].isEmpty) {
-  //           submittedOrders.remove(order);
-  //         }
-  //       });
-
-  //       showDialog(
-  //         context: context,
-  //         builder: (context) => AlertDialog(
-  //           title: const Text("Success"),
-  //           content: const Text("Product deleted successfully!"),
-  //           actions: [
-  //             TextButton(
-  //               onPressed: () => Navigator.of(context).pop(),
-  //               child: const Text("OK"),
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     } catch (e) {
-  //       showDialog(
-  //         context: context,
-  //         builder: (context) => AlertDialog(
-  //           title: const Text("Error"),
-  //           content: Text("Failed to delete product: $e"),
-  //           actions: [
-  //             TextButton(
-  //               onPressed: () => Navigator.of(context).pop(),
-  //               child: const Text("OK"),
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     }
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -337,12 +225,8 @@ class _OrderScreenState extends State<OrderScreen> {
                     ),
                     submittedOrders.isNotEmpty
                         ? SingleChildScrollView(
-                         
-                          child: Table(
+                            child: Table(
                               border: TableBorder.all(),
-
-                    
-
                               children: [
                                 const TableRow(
                                   children: [
@@ -375,11 +259,6 @@ class _OrderScreenState extends State<OrderScreen> {
                                         child: Padding(
                                       padding: EdgeInsets.all(8.0),
                                       child: Text("Order Date"),
-                                    )),
-                                    TableCell(
-                                        child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text("Actions"),
                                     )),
                                   ],
                                 ),
@@ -414,35 +293,22 @@ class _OrderScreenState extends State<OrderScreen> {
                                         TableCell(
                                             child: Padding(
                                           padding: const EdgeInsets.all(8.0),
-                                          child: Text(product['calculatedTotal']),
+                                          child:
+                                              Text(product['calculatedTotal']),
                                         )),
                                         TableCell(
                                             child: Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(order['orderDate']),
                                         )),
-                                        TableCell(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Row(
-                                              children: [
-                                                IconButton(
-                                                  icon: Icon(Icons.edit),
-                                                  onPressed: () {
-                                                    _editOrder(order, product);
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
+                                       
                                       ],
                                     );
                                   }).toList();
-                                }).toList(),
+                                })
                               ],
                             ),
-                        )
+                          )
                         : const Text("No orders submitted yet."),
                   ],
                 ),
@@ -450,6 +316,175 @@ class _OrderScreenState extends State<OrderScreen> {
             );
           }
         },
+      ),
+    );
+  }
+}
+class EditScreen extends StatefulWidget {
+  final List<OrderDetail> orderDetails;
+  final int customerId;
+  final int orderId;
+
+  const EditScreen({
+    Key? key,
+    required this.orderDetails,
+    required this.customerId,
+    required this.orderId,
+  }) : super(key: key);
+
+  @override
+  _EditScreenState createState() => _EditScreenState();
+}
+
+class _EditScreenState extends State<EditScreen> {
+  late List<TextEditingController> quantityControllers;
+  late List<Product> products; 
+  late List<int?> selectedProductIds; 
+
+  @override
+  void initState() {
+    super.initState();
+    quantityControllers = widget.orderDetails
+        .map((detail) => TextEditingController(text: detail.quantity.toString()))
+        .toList();
+    selectedProductIds = widget.orderDetails
+        .map((detail) => detail.productId)
+        .toList();
+    products = [];
+    _fetchProducts(); 
+  }
+
+  Future<void> _fetchProducts() async {
+    try {
+      final fetchedProducts = await fetchProducts(); 
+      setState(() {
+        products = fetchedProducts;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching products: $e')),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in quantityControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+ void _updateOrder() async {
+  List<OrderDetails> updatedOrderDetails = [];
+  double totalNetAmount = 0.0; 
+  for (int i = 0; i < widget.orderDetails.length; i++) {
+    int updatedQuantity = int.tryParse(quantityControllers[i].text) ?? 0;
+    if (updatedQuantity <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Quantity must be greater than zero.')),
+      );
+      return;
+    }
+
+    final selectedProductId = selectedProductIds[i];
+    if (selectedProductId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a product.')),
+      );
+      return;
+    }
+
+   
+    double pricePerItem = widget.orderDetails[i].totalAmount / widget.orderDetails[i].quantity;
+
+    
+    double netAmount = updatedQuantity * pricePerItem;
+
+   
+    updatedOrderDetails.add(OrderDetails(
+      productId: selectedProductId,
+      quantity: updatedQuantity,
+      totalAmount: netAmount,
+    ));
+
+  
+    totalNetAmount += netAmount;
+  }
+
+  try {
+    await updateOrders(
+      orderId: widget.orderId,
+      customerId: widget.customerId,
+      orderDate: DateTime.now().toIso8601String(),
+      netAmount: totalNetAmount,
+      orderDetails: updatedOrderDetails, 
+    );
+
+    setState(() {
+      
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Order updated successfully!')),
+    );
+    Navigator.of(context).pop();
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error updating order: $e')),
+    );
+  }
+}
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Edit Order')),
+      body: products.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: widget.orderDetails.length,
+              itemBuilder: (context, index) {
+                final detail = widget.orderDetails[index];
+                final selectedProductId = selectedProductIds[index];
+                return ListTile(
+                  title: DropdownButton<Product>(
+                    value: products.firstWhere(
+                      (product) => product.productId == selectedProductId,
+                      orElse: () => products.first,
+                    ),
+                    items: products.map((product) {
+                      return DropdownMenuItem<Product>(
+                        value: product,
+                        child: Text(product.productName),
+                      );
+                    }).toList(),
+                    onChanged: (selectedProduct) {
+                      setState(() {
+                        selectedProductIds[index] = selectedProduct?.productId;
+                      });
+                    },
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: quantityControllers[index],
+                        decoration: const InputDecoration(labelText: 'Quantity'),
+                        keyboardType: TextInputType.number,
+                      ),
+                      Text('Product ID: ${selectedProductIds[index]}'),
+                      Text(
+                        'Total Amount: \$${detail.totalAmount.toStringAsFixed(2)}',
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _updateOrder,
+        child: const Icon(Icons.save),
       ),
     );
   }

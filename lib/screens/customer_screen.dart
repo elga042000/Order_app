@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:order_taking_app/Models/customer.dart';
 import 'package:order_taking_app/common.dart';
-import 'package:order_taking_app/Models/order.dart';
-
+import 'package:order_taking_app/screens/order_screen.dart';
 
 class AddCustomers extends StatefulWidget {
   const AddCustomers({super.key});
@@ -171,7 +170,6 @@ class _ViewCustomersState extends State<ViewCustomers> {
             } else {
               final customers = snapshot.data!;
               return ListView.builder(
-                
                 itemCount: customers.length,
                 itemBuilder: (context, index) {
                   final customer = customers[index];
@@ -185,18 +183,17 @@ class _ViewCustomersState extends State<ViewCustomers> {
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     child: ListTile(
-                      
                       leading: Text(
                         customer.customerId?.toString() ?? 'N/A',
-                        style: TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.white),
                       ),
                       title: Text(
                         customer.customerName,
-                        style: TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.white),
                       ),
                       subtitle: Text(
                         customer.customerCity,
-                        style: TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.white),
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -271,6 +268,17 @@ class _ViewCustomersState extends State<ViewCustomers> {
                               color: Colors.lightGreen,
                             ),
                             onPressed: () async {
+                              // Check for null values
+                              if (customer.customerId == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Customer ID or name is missing')),
+                                );
+                                return;
+                              }
+
+                              // Show loading dialog
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
@@ -282,11 +290,14 @@ class _ViewCustomersState extends State<ViewCustomers> {
                                   );
                                 },
                               );
+
                               try {
                                 List<custOrder> orders =
                                     await fetchOrders(customer.customerId!);
+                                Navigator.of(context)
+                                    .pop(); // Dismiss loading dialog
 
-                                Navigator.of(context).pop();
+                                // Show orders in a dialog
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
@@ -300,8 +311,7 @@ class _ViewCustomersState extends State<ViewCustomers> {
                                               orders.map((custOrder order) {
                                             return ListTile(
                                               title: Text(
-                                                'Order ID: ${order.orderId}',
-                                              ),
+                                                  'Order ID: ${order.orderId}'),
                                               subtitle: Column(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
@@ -328,25 +338,42 @@ class _ViewCustomersState extends State<ViewCustomers> {
                                                   ),
                                                 ],
                                               ),
-                                              // trailing: Row(
-                                              //   mainAxisSize: MainAxisSize.min,
-                                              //   children: [
-                                              //     IconButton(
-                                              //       onPressed: () {
-                                              //      //    _editOrder(order, product);
-                                              //       },
-                                              //       icon: Icon(Icons.edit),
-                                              //     ),
-                                              //     IconButton(
-                                              //       onPressed: () {},
-                                              //       icon: Icon(Icons.add),
-                                              //     ),
-                                              //     IconButton(
-                                              //       onPressed: () {},
-                                              //       icon: Icon(Icons.delete),
-                                              //     )
-                                              //   ],
-                                              // ),
+                                              trailing: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  IconButton(
+                                                    onPressed: () {
+                                                     
+                                                      if (order.orderDetails
+                                                          .isNotEmpty) {
+                                                       
+                                                        Navigator.of(context)
+                                                            .push(
+                                                          MaterialPageRoute(
+                                                            builder:
+                                                                (context) =>
+                                                                    EditScreen(
+                                                              orderDetails: order.orderDetails,
+                                                                  customerId:order.customerId ,
+                                                                  orderId: order.orderId, 
+                                                            ),
+                                                          ),
+                                                        );
+                                                      } else {
+                                                        ScaffoldMessenger.of(
+                                                                context)
+                                                            .showSnackBar(
+                                                          const SnackBar(
+                                                              content: Text(
+                                                                  'No order details available')),
+                                                        );
+                                                      }
+                                                    },
+                                                    icon:
+                                                        const Icon(Icons.edit),
+                                                  ),
+                                                ],
+                                              ),
                                             );
                                           }).toList(),
                                         ),
@@ -362,10 +389,8 @@ class _ViewCustomersState extends State<ViewCustomers> {
                                   },
                                 );
                               } catch (e) {
-                                Navigator.of(context).pop();
-
-                                //print(
-                                //   'Error fetching orders: $e'); // Debugging statement
+                                Navigator.of(context)
+                                    .pop(); // Dismiss loading dialog
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                       content:
@@ -373,7 +398,7 @@ class _ViewCustomersState extends State<ViewCustomers> {
                                 );
                               }
                             },
-                          ),
+                          )
                         ],
                       ),
                     ),
@@ -475,7 +500,7 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
           child: Column(
             children: [
               TextField(
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
                 controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: 'Customer Name',
@@ -492,7 +517,7 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
               ),
               const SizedBox(height: 16),
               TextField(
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
                 controller: _cityController,
                 decoration: const InputDecoration(
                   labelText: 'Customer City',
@@ -511,7 +536,7 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
               TextField(
                 maxLength: 10,
                 keyboardType: TextInputType.number,
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
                 controller: _numberController,
                 decoration: const InputDecoration(
                   labelText: 'Phone',
@@ -526,11 +551,10 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
               ElevatedButton(
-                //style: ButtonStyle(iconColor: Colors.white),
                 onPressed: _isLoading ? null : _saveCustomer,
                 child: const Text("Save"),
               ),
@@ -546,151 +570,3 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
     );
   }
 }
-
-
-class EditOrderScreen extends StatefulWidget {
-  final Order order;
-
-  EditOrderScreen({required this.order});
-
-  @override
-  _EditOrderScreenState createState() => _EditOrderScreenState();
-}
-
-class _EditOrderScreenState extends State<EditOrderScreen> {
-  late TextEditingController productIdController;
-  late TextEditingController quantityController;
-  late TextEditingController netAmountController;
-  late TextEditingController totalAmountController;
-  late TextEditingController dateController;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize controllers with the first order detail
-    productIdController = TextEditingController(text: widget.order.orderDetails[0].productId.toString());
-    quantityController = TextEditingController(text: widget.order.orderDetails[0].quantity.toString());
-    netAmountController = TextEditingController(text: widget.order.orderDetails[0].totalAmount.toString());
-    totalAmountController = TextEditingController(text: widget.order.netAmount.toString());
-    dateController = TextEditingController(text: widget.order.orderDate.toIso8601String());
-  }
-
-  @override
-  void dispose() {
-    productIdController.dispose();
-    quantityController.dispose();
-    netAmountController.dispose();
-    totalAmountController.dispose();
-    dateController.dispose();
-    super.dispose();
-  }
-
-  void saveChanges() async {
-    String productId = productIdController.text;
-    int quantity = int.tryParse(quantityController.text) ?? 0; 
-    double netAmount = double.tryParse(netAmountController.text) ?? 0.0; 
-    double totalAmount = double.tryParse(totalAmountController.text) ?? 0.0; 
-    String orderDate = dateController.text;
-
-    // Validate inputs
-    if (productId.isEmpty || quantity <= 0 || netAmount < 0 || totalAmount < 0 || orderDate.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill in all fields correctly.')),
-      );
-      return;
-    }
-
-    OrderDetails updatedOrderDetail = OrderDetails(
-      productId: int.parse(productId), 
-      quantity: quantity,
-      totalAmount: netAmount, 
-    );
-
-    Order updatedOrder = Order(
-      customerId: widget.order.customerId,
-      orderDate: DateTime.parse(orderDate),
-      netAmount: totalAmount, 
-      orderDetails: [updatedOrderDetail], 
-    );
-
-    try {
-      await submitOrders(
-        customerId: updatedOrder.customerId,
-        orderDate: updatedOrder.orderDate.toIso8601String(), 
-        netAmount: updatedOrder.netAmount,
-        orders: updatedOrder.orderDetails,
-      );
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Order updated successfully!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update order: $e')),
-      );
-    }
-
-    Navigator.of(context).pop();
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.parse(dateController.text),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null && picked != DateTime.parse(dateController.text)) {
-      setState(() {
-        dateController.text = picked.toIso8601String();
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Edit Order'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: productIdController,
-              decoration: InputDecoration(labelText: 'Product ID'),
-            ),
-            TextField(
-              controller: quantityController,
-              decoration: InputDecoration(labelText: 'Quantity'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: netAmountController,
-              decoration: InputDecoration(labelText: 'Net Amount'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: totalAmountController,
-              decoration: InputDecoration(labelText: 'Total Amount'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: dateController,
-              decoration: InputDecoration(labelText: 'Date'),
-              onTap: () => _selectDate(context),
-              readOnly: true, 
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: saveChanges,
-              child: Text('Save Changes'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-

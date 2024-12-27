@@ -56,6 +56,7 @@ class CustomerService {
   }
 }
 
+
 //ADD CUSTOMER
 Future<void> submitCustomer(String customerName, String customerCity,String phoneNumber) async {
   final url = Uri.parse('http://localhost:5224/api/Order/PostCustomer');
@@ -200,7 +201,7 @@ class custOrder {
 }
 
 class OrderDetail {
-  final int productId;
+  late final int productId;
   final int quantity;
   final double totalAmount;
 
@@ -217,6 +218,8 @@ class OrderDetail {
       totalAmount: json['totalAmount'],
     );
   }
+
+  get productName => null;
 }
 
 Future<List<custOrder>> fetchOrders(int customerId) async {

@@ -1,18 +1,22 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
 Product productFromJSON(String str) => Product.fromJson(jsonDecode(str));
+
 class Product {
   final int productId;
   final String productName;
   final String productPrice;
   final int stock;
   int quantity;
+  final String? imageUrl;
   Product({
     required this.productId,
     required this.productName,
     required this.productPrice,
     required this.stock,
     this.quantity = 0,
+    this.imageUrl,
   });
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
@@ -26,6 +30,7 @@ class Product {
     );
   }
 }
+
 Future<void> submitproducts(
     String productName, String productPrice, String stock) async {
   final url = Uri.parse('http://localhost:5224/api/Order/PostProducts');
@@ -54,6 +59,7 @@ Future<void> submitproducts(
     throw Exception('Network error occurred');
   }
 }
+
 Future<List<Product>> fetchProducts() async {
   final response = await http
       .get(Uri.parse('http://localhost:5224/api/Order/GetAllProducts'));
@@ -65,8 +71,9 @@ Future<List<Product>> fetchProducts() async {
     throw Exception('Failed to load products');
   }
 }
+
 Future<Product> updateStock(
-    int productId, String productName,int stock) async {
+    int productId, String productName, int stock) async {
   final url = Uri.parse('http://localhost:5224/api/Order/UpdateStock');
   final body = jsonEncode({
     'productId': productId,

@@ -102,16 +102,19 @@ class _ViewProductsState extends State<ViewProducts> {
                 child: Column(
                   children: [
                     TextField(
-                      style: TextStyle(color: Colors.white),
+                      style:const TextStyle(color: Colors.white),
                       controller: _searchController,
                       autofocus: true,
                       onChanged: (value) => _filterProducts(value, products),
                       decoration: InputDecoration(
                         labelText: 'Search Products',
-                        labelStyle: TextStyle(color: Colors.white),
-                        border: OutlineInputBorder(),
+                        labelStyle: const TextStyle(color: Colors.white),
+                        border:const  OutlineInputBorder(),
                         suffixIcon: IconButton(
-                          icon: Icon(Icons.search,color: Colors.white,),
+                          icon:const  Icon(
+                            Icons.search,
+                            color: Colors.white,
+                          ),
                           onPressed: _onSearch,
                         ),
                       ),
@@ -135,7 +138,8 @@ class _ViewProductsState extends State<ViewProducts> {
                               final isOutOfStock = product.stock <= 0;
                               return Card(
                                 color: isOutOfStock
-                                    ? Colors.redAccent.withOpacity(0.7)
+                                    ? const Color.fromARGB(255, 233, 32, 32)
+                                        .withOpacity(0.7)
                                     : const Color.fromARGB(255, 211, 243, 242),
                                 elevation: 4,
                                 child: Padding(
@@ -145,13 +149,16 @@ class _ViewProductsState extends State<ViewProducts> {
                                     children: [
                                       //add pic
 
+                                      
+
                                       Text(
                                         'ID: ${product.productId}',
                                         style: const TextStyle(
-                                          fontFamily: 'JosefinSans',
-                                          fontWeight: FontWeight.bold,
+                                            fontFamily: 'JosefinSans',
+                                            fontWeight: FontWeight.bold,
                                             fontSize: 14,
-                                            color: Color.fromARGB(255, 0, 0, 0)),
+                                            color:
+                                                Color.fromARGB(255, 0, 0, 0)),
                                         textAlign: TextAlign.center,
                                       ),
                                       Text(
@@ -205,8 +212,8 @@ class _ViewProductsState extends State<ViewProducts> {
                                           }
                                         },
                                         icon: const Icon(Icons.add_box_rounded),
-                                        color: const Color.fromARGB(255, 4, 45, 79),
-                                      
+                                        color: const Color.fromARGB(
+                                            255, 4, 45, 79),
                                       ),
                                     ],
                                   ),
