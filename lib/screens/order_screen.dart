@@ -24,7 +24,6 @@ class _OrderScreenState extends State<OrderScreen> {
   List<Map<String, dynamic>> submittedOrders = [];
   List<Map<String, dynamic>> orderDetails = [];
   List<Map<String, dynamic>> orders = [];
-  
 
   @override
   void didChangeDependencies() {
@@ -301,7 +300,6 @@ class _OrderScreenState extends State<OrderScreen> {
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(order['orderDate']),
                                         )),
-                                       
                                       ],
                                     );
                                   }).toList();
@@ -320,13 +318,16 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 }
+
 class EditScreen extends StatefulWidget {
   final List<OrderDetail> orderDetails;
+ 
   final int customerId;
   final int orderId;
 
-  const EditScreen({
+   EditScreen({
     Key? key,
+   
     required this.orderDetails,
     required this.customerId,
     required this.orderId,
@@ -338,25 +339,25 @@ class EditScreen extends StatefulWidget {
 
 class _EditScreenState extends State<EditScreen> {
   late List<TextEditingController> quantityControllers;
-  late List<Product> products; 
-  late List<int?> selectedProductIds; 
+  late List<Product> products;
+  late List<int?> selectedProductIds;
 
   @override
   void initState() {
     super.initState();
     quantityControllers = widget.orderDetails
-        .map((detail) => TextEditingController(text: detail.quantity.toString()))
+        .map(
+            (detail) => TextEditingController(text: detail.quantity.toString()))
         .toList();
-    selectedProductIds = widget.orderDetails
-        .map((detail) => detail.productId)
-        .toList();
+    selectedProductIds =
+        widget.orderDetails.map((detail) => detail.productId).toList();
     products = [];
-    _fetchProducts(); 
+    _fetchProducts();
   }
 
   Future<void> _fetchProducts() async {
     try {
-      final fetchedProducts = await fetchProducts(); 
+      final fetchedProducts = await fetchProducts();
       setState(() {
         products = fetchedProducts;
       });
@@ -375,66 +376,67 @@ class _EditScreenState extends State<EditScreen> {
     super.dispose();
   }
 
- void _updateOrder() async {
-  List<OrderDetails> updatedOrderDetails = [];
-  double totalNetAmount = 0.0; 
-  for (int i = 0; i < widget.orderDetails.length; i++) {
-    int updatedQuantity = int.tryParse(quantityControllers[i].text) ?? 0;
-    if (updatedQuantity <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Quantity must be greater than zero.')),
+  void _updateOrder() async {
+    List<OrderDetails> updatedOrderDetails = [];
+    double totalNetAmount = 0.0;
+    for (int i = 0; i < widget.orderDetails.length; i++) {
+      int updatedQuantity = int.tryParse(quantityControllers[i].text) ?? 0;
+      if (updatedQuantity <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Quantity must be greater than zero.')),
+        );
+        return;
+      }
+
+      final selectedProductId = selectedProductIds[i];
+      if (selectedProductId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a product.')),
+        );
+        return;
+      }
+
+      Product selectedProduct = products.firstWhere(
+        (product) => product.productId == selectedProductId,
+        orElse: () => products.first,
       );
-      return;
+      double pricePerItem =
+          widget.orderDetails[i].totalAmount / widget.orderDetails[i].quantity;
+
+      double netAmount = updatedQuantity * pricePerItem;
+
+      updatedOrderDetails.add(OrderDetails(
+        productId: selectedProductId,
+        quantity: updatedQuantity,
+        totalAmount: netAmount,
+      ));
+
+      totalNetAmount += netAmount;
     }
 
-    final selectedProductId = selectedProductIds[i];
-    if (selectedProductId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a product.')),
+    try {
+      await updateOrders(
+        orderId: widget.orderId,
+        customerId: widget.customerId,
+        orderDate: DateTime.now().toIso8601String(),
+        netAmount: totalNetAmount,
+        orderDetails: updatedOrderDetails,
       );
-      return;
+
+      setState(() {
+       
+       
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Order updated successfully!')),
+      );
+      Navigator.of(context).pop();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating order: $e')),
+      );
     }
-
-   
-    double pricePerItem = widget.orderDetails[i].totalAmount / widget.orderDetails[i].quantity;
-
-    
-    double netAmount = updatedQuantity * pricePerItem;
-
-   
-    updatedOrderDetails.add(OrderDetails(
-      productId: selectedProductId,
-      quantity: updatedQuantity,
-      totalAmount: netAmount,
-    ));
-
-  
-    totalNetAmount += netAmount;
   }
-
-  try {
-    await updateOrders(
-      orderId: widget.orderId,
-      customerId: widget.customerId,
-      orderDate: DateTime.now().toIso8601String(),
-      netAmount: totalNetAmount,
-      orderDetails: updatedOrderDetails, 
-    );
-
-    setState(() {
-      
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Order updated successfully!')),
-    );
-    Navigator.of(context).pop();
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error updating order: $e')),
-    );
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -447,6 +449,10 @@ class _EditScreenState extends State<EditScreen> {
               itemBuilder: (context, index) {
                 final detail = widget.orderDetails[index];
                 final selectedProductId = selectedProductIds[index];
+                final selectedProduct = products.firstWhere(
+                  (product) => product.productId == selectedProductId,
+                  orElse: () => products.first,
+                );
                 return ListTile(
                   title: DropdownButton<Product>(
                     value: products.firstWhere(
@@ -470,7 +476,8 @@ class _EditScreenState extends State<EditScreen> {
                     children: [
                       TextField(
                         controller: quantityControllers[index],
-                        decoration: const InputDecoration(labelText: 'Quantity'),
+                        decoration:
+                            const InputDecoration(labelText: 'Quantity'),
                         keyboardType: TextInputType.number,
                       ),
                       Text('Product ID: ${selectedProductIds[index]}'),
@@ -482,9 +489,11 @@ class _EditScreenState extends State<EditScreen> {
                 );
               },
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _updateOrder,
-        child: const Icon(Icons.save),
+      floatingActionButton: Center(
+        child: FloatingActionButton(
+          onPressed: _updateOrder,
+          child: const Icon(Icons.save_rounded),
+        ),
       ),
     );
   }

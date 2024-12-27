@@ -147,10 +147,6 @@ class _ViewProductsState extends State<ViewProducts> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      //add pic
-
-                                      
-
                                       Text(
                                         'ID: ${product.productId}',
                                         style: const TextStyle(

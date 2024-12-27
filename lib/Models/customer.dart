@@ -28,7 +28,6 @@ class Customer {
     };
   }
 }
-
 class CustomerService {
   final String apiUrl;
   CustomerService(this.apiUrl);
@@ -55,8 +54,6 @@ class CustomerService {
     }
   }
 }
-
-
 //ADD CUSTOMER
 Future<void> submitCustomer(String customerName, String customerCity,String phoneNumber) async {
   final url = Uri.parse('http://localhost:5224/api/Order/PostCustomer');
@@ -65,7 +62,6 @@ Future<void> submitCustomer(String customerName, String customerCity,String phon
     'customerCity': customerCity,
     'phoneNumber':phoneNumber,
   });
-
   try {
     final response = await http.post(
       url,
@@ -74,10 +70,7 @@ Future<void> submitCustomer(String customerName, String customerCity,String phon
       },
       body: body,
     );
-
     if (response.statusCode == 201 || response.statusCode == 200) {
-      
-
       Customer.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
     } else {
       throw Exception(
@@ -88,7 +81,6 @@ Future<void> submitCustomer(String customerName, String customerCity,String phon
     throw Exception('Network error occurred');
   }
 }
-
 //EDIT CUSTOMER
 Future<Customer> updateCustomer(
     int customerId, String customerName, String customerCity,String phoneNumber) async {
@@ -99,7 +91,6 @@ Future<Customer> updateCustomer(
     'customerCity': customerCity,
     'phoneNumber':phoneNumber,
   });
-
   try {
     final response = await http.put(
       url,
@@ -108,29 +99,22 @@ Future<Customer> updateCustomer(
       },
       body: body,
     );
-
     if (response.statusCode == 200 || response.statusCode == 201) {
      
       return Customer.fromJson(
           jsonDecode(response.body) as Map<String, dynamic>);
-    } else {
-      
-      
+    } else {     
       throw Exception(
           'Failed to update customer: ${response.statusCode} ${response.reasonPhrase}');
     }
-  } catch (e) {
-    
-   
+  } catch (e) {  
     throw Exception('Network error occurred: $e');
   }
 }
-
 //GET CUSTOMER
 Future<List<Customer>> fetchCustomer() async {
   final response = await http
       .get(Uri.parse('http://localhost:5224/api/Order/GetAllCustomers'));
-
   if (response.statusCode == 200) {
     List jsonResponse = json.decode(response.body);
     return jsonResponse.map((customer) => Customer.fromJson(customer)).toList();
@@ -138,13 +122,10 @@ Future<List<Customer>> fetchCustomer() async {
     throw Exception('Failed to load customers');
   }
 }
-
 //DELETE CUSTOMER
-
 Future<void> deleteCustomer(int customerId) async {
   final url =
       Uri.parse('http://localhost:5224/api/Order/DeleteCustomer/$customerId');
-
   try {
     final response = await http.delete(
       url,
@@ -152,7 +133,6 @@ Future<void> deleteCustomer(int customerId) async {
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
-
     if (response.statusCode == 200 || response.statusCode == 204) {
       print('Customer deleted successfully!');
     } else {
@@ -164,17 +144,13 @@ Future<void> deleteCustomer(int customerId) async {
     throw Exception('Network error occurred: $e');
   }
 }
-
 // Order model
-
-
 class custOrder {
   final int orderId;
   final int customerId;
   final String orderDate;
   final double netAmount;
   final List<OrderDetail> orderDetails;
-
   custOrder({
     required this.orderId,
     required this.customerId,
@@ -182,8 +158,6 @@ class custOrder {
     required this.netAmount,
     required this.orderDetails,
   });
-
- 
   factory custOrder.fromJson(Map<String, dynamic> json) {
     var orderDetailsFromJson = json['orderDetails'] as List;
     List<OrderDetail> orderDetailsList = orderDetailsFromJson
@@ -199,18 +173,15 @@ class custOrder {
     );
   }
 }
-
 class OrderDetail {
   late final int productId;
   final int quantity;
   final double totalAmount;
-
   OrderDetail({
     required this.productId,
     required this.quantity,
     required this.totalAmount,
   });
-
   factory OrderDetail.fromJson(Map<String, dynamic> json) {
     return OrderDetail(
       productId: json['productId'],
@@ -218,15 +189,12 @@ class OrderDetail {
       totalAmount: json['totalAmount'],
     );
   }
-
   get productName => null;
 }
-
 Future<List<custOrder>> fetchOrders(int customerId) async {
   final response = await http.get(
     Uri.parse('http://localhost:5224/api/Order/getorders/$customerId'),
   );
-
   if (response.statusCode == 200) {
     List jsonResponse = json.decode(response.body);
     return jsonResponse.map((order) => custOrder.fromJson(order)).toList();

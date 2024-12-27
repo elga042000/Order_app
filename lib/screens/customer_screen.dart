@@ -178,7 +178,7 @@ class _ViewCustomersState extends State<ViewCustomers> {
                         vertical: 8.0, horizontal: 16.0),
                     decoration: BoxDecoration(
                       border: Border.all(
-                          color: const Color.fromARGB(255, 8, 2, 2),
+                          color: const Color.fromARGB(255, 116, 141, 178),
                           width: 1.0),
                       borderRadius: BorderRadius.circular(8.0),
                     ),
@@ -268,7 +268,7 @@ class _ViewCustomersState extends State<ViewCustomers> {
                               color: Colors.lightGreen,
                             ),
                             onPressed: () async {
-                              // Check for null values
+                             
                               if (customer.customerId == null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
@@ -278,7 +278,7 @@ class _ViewCustomersState extends State<ViewCustomers> {
                                 return;
                               }
 
-                              // Show loading dialog
+                            
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
@@ -295,9 +295,9 @@ class _ViewCustomersState extends State<ViewCustomers> {
                                 List<custOrder> orders =
                                     await fetchOrders(customer.customerId!);
                                 Navigator.of(context)
-                                    .pop(); // Dismiss loading dialog
+                                    .pop(); 
 
-                                // Show orders in a dialog
+                               
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
@@ -353,6 +353,7 @@ class _ViewCustomersState extends State<ViewCustomers> {
                                                             builder:
                                                                 (context) =>
                                                                     EditScreen(
+                                                                    
                                                               orderDetails: order.orderDetails,
                                                                   customerId:order.customerId ,
                                                                   orderId: order.orderId, 
@@ -370,7 +371,7 @@ class _ViewCustomersState extends State<ViewCustomers> {
                                                       }
                                                     },
                                                     icon:
-                                                        const Icon(Icons.edit),
+                                                        const Icon(Icons.edit,color: Color.fromARGB(255, 23, 65, 164),),
                                                   ),
                                                 ],
                                               ),
@@ -390,7 +391,7 @@ class _ViewCustomersState extends State<ViewCustomers> {
                                 );
                               } catch (e) {
                                 Navigator.of(context)
-                                    .pop(); // Dismiss loading dialog
+                                    .pop(); 
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                       content:

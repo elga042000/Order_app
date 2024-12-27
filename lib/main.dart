@@ -27,7 +27,6 @@ class MyApp extends StatelessWidget {
         '/customer': (context) => const CustomerManagement(),
         '/product': (context) => const ProductManagement(),
         '/stock': (context) => const UpdateStock(),
-      //  '/editOrder':(context)=>const EditOrderScreen(order: order, customerId: customerId, selectedDate: selectedDate, orderDetails: orderDetails)
       },
       debugShowCheckedModeBanner: false,
     );
@@ -59,7 +58,7 @@ class _FirstScreenState extends State<HomeScreen> {
         ),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
-        //leading: Image.asset('assets/logo.jpg',height:24,width:24),
+       
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,

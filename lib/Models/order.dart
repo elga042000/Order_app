@@ -1,19 +1,16 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 class Order {
   final int customerId;
   final DateTime orderDate;
   late double netAmount;
   final List<OrderDetails> orderDetails;
-
   Order({
     required this.customerId,
     required this.orderDate,
     required this.netAmount,
     required this.orderDetails,
   });
-
   factory Order.fromJson(Map<String, dynamic> json) {
     var orderDetailsFromJson = json['orderDetails'] as List;
     List<OrderDetails> orderDetailsList =
@@ -26,7 +23,6 @@ class Order {
       orderDetails: orderDetailsList,
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'customerId': customerId,
@@ -36,7 +32,6 @@ class Order {
     };
   }
 }
-
 class OrderDetails {
   final int productId;
   late int quantity;
@@ -55,7 +50,6 @@ class OrderDetails {
       totalAmount: (json['totalAmount'] as num).toDouble(),
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'productId': productId,
@@ -64,7 +58,6 @@ class OrderDetails {
     };
   }
 }
-
 Future<void> submitOrders({
   required int customerId,
   required String orderDate,
@@ -72,22 +65,18 @@ Future<void> submitOrders({
   required List<OrderDetails> orders,
 }) async {
   final url = Uri.parse('http://localhost:5224/api/Order/POSTorder');
-
-  // Prepare the request body
   final body = jsonEncode({
     "customerId": customerId,
     "orderDate": orderDate,
     "netAmount": netAmount,
     "orderDetails": orders.map((order) => order.toJson()).toList(),
   });
-
   try {
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
       body: body,
     );
-
     if (response.statusCode == 201 || response.statusCode == 200) {
       print('Order submitted successfully!');
     } else {
@@ -99,7 +88,6 @@ Future<void> submitOrders({
     throw Exception('Network error occurred');
   }
 }
-
 Future<void> updateOrders({
   required int orderId,
   required int customerId,
@@ -108,8 +96,6 @@ Future<void> updateOrders({
   required List<OrderDetails> orderDetails,
 }) async {
   final url = Uri.parse('http://localhost:5224/api/Order/UpdateOrder');
-  
-  // Prepare the request body
   final body = jsonEncode({
     "orderId": orderId,
     "orderDate": orderDate,
@@ -117,30 +103,25 @@ Future<void> updateOrders({
     "netAmount": netAmount,
     "OrderDetails": orderDetails.map((order) => order.toJson()).toList(),
   });
-
   try {
     final response = await http.put(
       url,
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
       body: body,
     );
-
-    if (response.statusCode == 200) {
-      // Handle success
+    if (response.statusCode == 200) {   
       print('Order updated successfully');
-      print(response.body); // Optional: for debugging response
+      print(response.body); 
     } else if (response.statusCode == 400) {
-      // Handle BadRequest (incorrect data like missing customer/order)
       print('Failed to update order: Bad Request');
-      print(response.body); // Optional: for debugging response
+      print(response.body); 
     } else if (response.statusCode == 404) {
-      // Handle NotFound (order does not exist)
+      
       print('Failed to update order: Order not found');
-      print(response.body); // Optional: for debugging response
+      print(response.body); 
     } else {
-      // Handle other status codes
       print('Error occurred: ${response.statusCode}');
-      print(response.body); // Optional: for debugging response
+      print(response.body); 
     }
   } catch (e) {
     print('Network error occurred: $e');

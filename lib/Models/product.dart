@@ -1,22 +1,20 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 Product productFromJSON(String str) => Product.fromJson(jsonDecode(str));
-
 class Product {
   final int productId;
   final String productName;
   final String productPrice;
   final int stock;
   int quantity;
-  final String? imageUrl;
+  
   Product({
     required this.productId,
     required this.productName,
     required this.productPrice,
     required this.stock,
     this.quantity = 0,
-    this.imageUrl,
+   
   });
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
@@ -48,14 +46,14 @@ Future<void> submitproducts(
       body: body,
     );
     if (response.statusCode == 201 || response.statusCode == 200) {
-      // print('Product added successfully!');
+      
       Product.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
     } else {
       throw Exception(
           'Failed to add product: ${response.statusCode} ${response.reasonPhrase}');
     }
   } catch (e) {
-    // print('Error: $e');
+   
     throw Exception('Network error occurred');
   }
 }
@@ -96,8 +94,7 @@ Future<Product> updateStock(
           'Failed to update : ${response.statusCode} ${response.reasonPhrase}');
     }
   } catch (e) {
-    // Log the error for debugging
-    //  print('Error: $e');
+    
     throw Exception('Network error occurred: $e');
   }
 }
