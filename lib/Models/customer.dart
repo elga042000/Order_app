@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
 Customer customerFromJSON(String str) => Customer.fromJson(jsonDecode(str));
+
 class Customer {
   final int? customerId;
   final String customerName;
@@ -24,21 +26,21 @@ class Customer {
     return {
       'customerName': customerName,
       'customerCity': customerCity,
-      'phoneNumber':phoneNumber,
+      'phoneNumber': phoneNumber,
     };
   }
 }
+
 class CustomerService {
   final String apiUrl;
   CustomerService(this.apiUrl);
-
-  Future<bool> addCustomer(String customerName, String customerCity, String phoneNumber) async {
+  Future<bool> addCustomer(
+      String customerName, String customerCity, String phoneNumber) async {
     final body = jsonEncode({
       'customerName': customerName,
       'customerCity': customerCity,
       'phoneNumber': phoneNumber,
     });
-
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
@@ -47,20 +49,21 @@ class CustomerService {
         },
         body: body,
       );
-
       return response.statusCode == 201 || response.statusCode == 200;
     } catch (e) {
       throw Exception('Network error occurred: $e');
     }
   }
 }
+
 //ADD CUSTOMER
-Future<void> submitCustomer(String customerName, String customerCity,String phoneNumber) async {
+Future<void> submitCustomer(
+    String customerName, String customerCity, String phoneNumber) async {
   final url = Uri.parse('http://localhost:5224/api/Order/PostCustomer');
   final body = jsonEncode({
     'customerName': customerName,
     'customerCity': customerCity,
-    'phoneNumber':phoneNumber,
+    'phoneNumber': phoneNumber,
   });
   try {
     final response = await http.post(
@@ -77,19 +80,19 @@ Future<void> submitCustomer(String customerName, String customerCity,String phon
           'Failed to add customer: ${response.statusCode} ${response.reasonPhrase}');
     }
   } catch (e) {
-    
     throw Exception('Network error occurred');
   }
 }
+
 //EDIT CUSTOMER
-Future<Customer> updateCustomer(
-    int customerId, String customerName, String customerCity,String phoneNumber) async {
+Future<Customer> updateCustomer(int customerId, String customerName,
+    String customerCity, String phoneNumber) async {
   final url = Uri.parse('http://localhost:5224/api/Order/EditCustomer');
   final body = jsonEncode({
     'customerId': customerId,
     'customerName': customerName,
     'customerCity': customerCity,
-    'phoneNumber':phoneNumber,
+    'phoneNumber': phoneNumber,
   });
   try {
     final response = await http.put(
@@ -100,17 +103,17 @@ Future<Customer> updateCustomer(
       body: body,
     );
     if (response.statusCode == 200 || response.statusCode == 201) {
-     
       return Customer.fromJson(
           jsonDecode(response.body) as Map<String, dynamic>);
-    } else {     
+    } else {
       throw Exception(
           'Failed to update customer: ${response.statusCode} ${response.reasonPhrase}');
     }
-  } catch (e) {  
+  } catch (e) {
     throw Exception('Network error occurred: $e');
   }
 }
+
 //GET CUSTOMER
 Future<List<Customer>> fetchCustomer() async {
   final response = await http
@@ -122,6 +125,7 @@ Future<List<Customer>> fetchCustomer() async {
     throw Exception('Failed to load customers');
   }
 }
+
 //DELETE CUSTOMER
 Future<void> deleteCustomer(int customerId) async {
   final url =
@@ -140,18 +144,20 @@ Future<void> deleteCustomer(int customerId) async {
           'Failed to delete customer: ${response.statusCode} ${response.reasonPhrase}');
     }
   } catch (e) {
-   
     throw Exception('Network error occurred: $e');
   }
 }
+
 // Order model
 class custOrder {
+  //final int productId;
   final int orderId;
   final int customerId;
   final String orderDate;
   final double netAmount;
   final List<OrderDetail> orderDetails;
   custOrder({
+    // required this.productId,
     required this.orderId,
     required this.customerId,
     required this.orderDate,
@@ -163,34 +169,41 @@ class custOrder {
     List<OrderDetail> orderDetailsList = orderDetailsFromJson
         .map((detail) => OrderDetail.fromJson(detail))
         .toList();
-
     return custOrder(
+      //productId: json['productId'],
       orderId: json['orderId'],
-      customerId:json['customerId'],
+      customerId: json['customerId'],
       orderDate: json['orderDate'],
       netAmount: json['netAmount'],
       orderDetails: orderDetailsList,
     );
   }
 }
+
 class OrderDetail {
+  //late final int orderId;
   late final int productId;
   final int quantity;
   final double totalAmount;
   OrderDetail({
+  // required this.orderId,
     required this.productId,
     required this.quantity,
     required this.totalAmount,
   });
   factory OrderDetail.fromJson(Map<String, dynamic> json) {
     return OrderDetail(
+   // orderId: json['orderId'],
       productId: json['productId'],
       quantity: json['quantity'],
       totalAmount: json['totalAmount'],
     );
   }
   get productName => null;
+
+  
 }
+
 Future<List<custOrder>> fetchOrders(int customerId) async {
   final response = await http.get(
     Uri.parse('http://localhost:5224/api/Order/getorders/$customerId'),

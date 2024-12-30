@@ -102,16 +102,16 @@ class _ViewProductsState extends State<ViewProducts> {
                 child: Column(
                   children: [
                     TextField(
-                      style:const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                       controller: _searchController,
                       autofocus: true,
                       onChanged: (value) => _filterProducts(value, products),
                       decoration: InputDecoration(
                         labelText: 'Search Products',
                         labelStyle: const TextStyle(color: Colors.white),
-                        border:const  OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
-                          icon:const  Icon(
+                          icon: const Icon(
                             Icons.search,
                             color: Colors.white,
                           ),
@@ -147,6 +147,7 @@ class _ViewProductsState extends State<ViewProducts> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
+                                      
                                       Text(
                                         'ID: ${product.productId}',
                                         style: const TextStyle(

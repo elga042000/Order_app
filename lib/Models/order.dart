@@ -1,15 +1,18 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
 class Order {
   final int customerId;
   final DateTime orderDate;
   late double netAmount;
+ //late int productId;
   final List<OrderDetails> orderDetails;
   Order({
     required this.customerId,
     required this.orderDate,
     required this.netAmount,
     required this.orderDetails,
+   // required this.productId
   });
   factory Order.fromJson(Map<String, dynamic> json) {
     var orderDetailsFromJson = json['orderDetails'] as List;
@@ -17,6 +20,7 @@ class Order {
         orderDetailsFromJson.map((e) => OrderDetails.fromJson(e)).toList();
 
     return Order(
+     // productId: json['productId']as int,
       customerId: json['customerId'] as int,
       orderDate: DateTime.parse(json['orderDate']),
       netAmount: (json['netAmount'] as num).toDouble(),
@@ -32,6 +36,7 @@ class Order {
     };
   }
 }
+
 class OrderDetails {
   final int productId;
   late int quantity;
@@ -58,6 +63,7 @@ class OrderDetails {
     };
   }
 }
+
 Future<void> submitOrders({
   required int customerId,
   required String orderDate,
@@ -88,6 +94,7 @@ Future<void> submitOrders({
     throw Exception('Network error occurred');
   }
 }
+
 Future<void> updateOrders({
   required int orderId,
   required int customerId,
@@ -109,22 +116,62 @@ Future<void> updateOrders({
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
       body: body,
     );
-    if (response.statusCode == 200) {   
+    if (response.statusCode == 200) {
       print('Order updated successfully');
-      print(response.body); 
+      print(response.body);
     } else if (response.statusCode == 400) {
       print('Failed to update order: Bad Request');
-      print(response.body); 
+      print(response.body);
     } else if (response.statusCode == 404) {
-      
       print('Failed to update order: Order not found');
-      print(response.body); 
+      print(response.body);
     } else {
       print('Error occurred: ${response.statusCode}');
-      print(response.body); 
+      print(response.body);
     }
   } catch (e) {
     print('Network error occurred: $e');
     throw Exception('Network error occurred');
+  }
+}
+
+Future<void> deleteOrder(int orderId) async {
+  final url = Uri.parse('http://localhost:5224/api/Order/deleteorder/$orderId');
+  try {
+    final response = await http.delete(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      print('Order deleted successfully!');
+    } else {
+      throw Exception(
+          'Failed to delete order: ${response.statusCode} ${response.reasonPhrase}');
+    }
+  } catch (e) {
+    throw Exception('Network error occurred: $e');
+  }
+}
+
+Future<void> deleteProductFromOrder(int orderId, int productId) async {
+ final url = Uri.parse('http://localhost:5224/api/Order/deleteproduct/$orderId/$productId');
+      
+  try {
+    final response = await http.delete(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      print('Product deleted successfully!');
+    } else {
+      throw Exception(
+          'Failed to delete product: ${response.statusCode} ${response.reasonPhrase}');
+    }
+  } catch (e) {
+    throw Exception('Network error occurred: $e');
   }
 }

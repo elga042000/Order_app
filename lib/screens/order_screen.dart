@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:order_taking_app/Models/customer.dart';
 import 'package:order_taking_app/Models/product.dart';
 import 'dart:convert';
-
 import 'package:order_taking_app/common.dart';
 import 'package:order_taking_app/Models/order.dart';
 
@@ -24,7 +23,6 @@ class _OrderScreenState extends State<OrderScreen> {
   List<Map<String, dynamic>> submittedOrders = [];
   List<Map<String, dynamic>> orderDetails = [];
   List<Map<String, dynamic>> orders = [];
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -321,18 +319,14 @@ class _OrderScreenState extends State<OrderScreen> {
 
 class EditScreen extends StatefulWidget {
   final List<OrderDetail> orderDetails;
- 
   final int customerId;
   final int orderId;
-
-   EditScreen({
+  EditScreen({
     Key? key,
-   
     required this.orderDetails,
     required this.customerId,
     required this.orderId,
   }) : super(key: key);
-
   @override
   _EditScreenState createState() => _EditScreenState();
 }
@@ -341,7 +335,6 @@ class _EditScreenState extends State<EditScreen> {
   late List<TextEditingController> quantityControllers;
   late List<Product> products;
   late List<int?> selectedProductIds;
-
   @override
   void initState() {
     super.initState();
@@ -368,6 +361,53 @@ class _EditScreenState extends State<EditScreen> {
     }
   }
 
+  void _addProduct() async {
+    Product? selectedProduct;
+    int quantity = 1;
+
+    selectedProduct = await showDialog<Product?>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Select Product'),
+          content: DropdownButton<Product>(
+            isExpanded: true,
+            items: products.map((product) {
+              return DropdownMenuItem<Product>(
+                value: product,
+                child: Text(product.productName),
+              );
+            }).toList(),
+            onChanged: (value) {
+              selectedProduct = value;
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(selectedProduct);
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (selectedProduct != null) {
+      setState(() {
+        widget.orderDetails.add(OrderDetail(
+          productId: selectedProduct!.productId,
+          quantity: quantity,
+          totalAmount: double.parse(selectedProduct!.productPrice) * quantity,
+        ));
+        selectedProductIds.add(selectedProduct!.productId);
+        quantityControllers
+            .add(TextEditingController(text: quantity.toString()));
+      });
+    }
+  }
+
   @override
   void dispose() {
     for (var controller in quantityControllers) {
@@ -387,7 +427,6 @@ class _EditScreenState extends State<EditScreen> {
         );
         return;
       }
-
       final selectedProductId = selectedProductIds[i];
       if (selectedProductId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -395,25 +434,21 @@ class _EditScreenState extends State<EditScreen> {
         );
         return;
       }
-
       Product selectedProduct = products.firstWhere(
         (product) => product.productId == selectedProductId,
         orElse: () => products.first,
       );
+
       double pricePerItem =
           widget.orderDetails[i].totalAmount / widget.orderDetails[i].quantity;
-
       double netAmount = updatedQuantity * pricePerItem;
-
       updatedOrderDetails.add(OrderDetails(
         productId: selectedProductId,
         quantity: updatedQuantity,
         totalAmount: netAmount,
       ));
-
       totalNetAmount += netAmount;
     }
-
     try {
       await updateOrders(
         orderId: widget.orderId,
@@ -422,11 +457,7 @@ class _EditScreenState extends State<EditScreen> {
         netAmount: totalNetAmount,
         orderDetails: updatedOrderDetails,
       );
-
-      setState(() {
-       
-       
-      });
+      setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Order updated successfully!')),
       );
@@ -441,59 +472,130 @@ class _EditScreenState extends State<EditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Order')),
+      appBar: AppBar(
+        title: const Text('Edit Order'),
+        backgroundColor: Colors.blueAccent,
+      ),
       body: products.isEmpty
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: widget.orderDetails.length,
-              itemBuilder: (context, index) {
-                final detail = widget.orderDetails[index];
-                final selectedProductId = selectedProductIds[index];
-                final selectedProduct = products.firstWhere(
-                  (product) => product.productId == selectedProductId,
-                  orElse: () => products.first,
-                );
-                return ListTile(
-                  title: DropdownButton<Product>(
-                    value: products.firstWhere(
-                      (product) => product.productId == selectedProductId,
-                      orElse: () => products.first,
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ListView.builder(
+                itemCount: widget.orderDetails.length,
+                itemBuilder: (context, index) {
+                  final detail = widget.orderDetails[index];
+                  final selectedProductId = selectedProductIds[index];
+                  final selectedProduct = products.firstWhere(
+                    (product) => product.productId == selectedProductId,
+                    orElse: () => products.first,
+                  );
+                  return Card(
+                    elevation: 4,
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          DropdownButton<Product>(
+                            value: selectedProduct,
+                            isExpanded: true,
+                            items: products.map((product) {
+                              return DropdownMenuItem<Product>(
+                                value: product,
+                                child: Text(product.productName),
+                              );
+                            }).toList(),
+                            onChanged: (selectedProduct) {
+                              setState(() {
+                                selectedProductIds[index] =
+                                    selectedProduct?.productId;
+                              });
+                            },
+                          ),
+                          TextField(
+                            controller: quantityControllers[index],
+                            decoration: const InputDecoration(
+                              labelText: 'Quantity',
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType: TextInputType.number,
+                          ),
+                          const SizedBox(height: 8.0),
+                          Text('Product ID: ${selectedProductIds[index]}'),
+                          Text(
+                            'Total Amount: \$${detail.totalAmount.toStringAsFixed(2)}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: () async {
+                                  final shouldDelete = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('Confirm Deletion'),
+                                      content: const Text(
+                                          'Are you sure you want to delete this product from the order?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(false),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(true),
+                                          child: const Text('Delete'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                                  if (shouldDelete == true) {
+                                    try {
+                                      await deleteProductFromOrder(
+                                          widget.orderId, selectedProductId!);
+
+                                      setState(() {
+                                        widget.orderDetails.removeAt(index);
+                                      });
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Product deleted successfully!')),
+                                      );
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Error deleting product: $e')),
+                                      );
+                                    }
+                                  }
+                                },
+                                icon: Icon(Icons.remove_circle_outline),
+                              ),
+                              IconButton(
+                                  onPressed: () {
+                                    _addProduct();
+                                  },
+                                  icon: Icon(Icons.add_box_outlined))
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    items: products.map((product) {
-                      return DropdownMenuItem<Product>(
-                        value: product,
-                        child: Text(product.productName),
-                      );
-                    }).toList(),
-                    onChanged: (selectedProduct) {
-                      setState(() {
-                        selectedProductIds[index] = selectedProduct?.productId;
-                      });
-                    },
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextField(
-                        controller: quantityControllers[index],
-                        decoration:
-                            const InputDecoration(labelText: 'Quantity'),
-                        keyboardType: TextInputType.number,
-                      ),
-                      Text('Product ID: ${selectedProductIds[index]}'),
-                      Text(
-                        'Total Amount: \$${detail.totalAmount.toStringAsFixed(2)}',
-                      ),
-                    ],
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-      floatingActionButton: Center(
-        child: FloatingActionButton(
-          onPressed: _updateOrder,
-          child: const Icon(Icons.save_rounded),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _updateOrder,
+        child: const Icon(Icons.save_rounded),
+        backgroundColor: const Color.fromARGB(255, 56, 223, 62),
       ),
     );
   }

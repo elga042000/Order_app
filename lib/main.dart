@@ -4,14 +4,11 @@ import 'package:order_taking_app/screens/customer_screen.dart';
 import 'package:order_taking_app/screens/order_screen.dart';
 import 'package:order_taking_app/screens/product_screen.dart';
 import 'package:order_taking_app/screens/view_products.dart';
-
 void main() {
   runApp(const MyApp());
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  
 
   @override
   Widget build(BuildContext context) {
@@ -32,18 +29,21 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
   @override
-  _FirstScreenState createState() => _FirstScreenState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
-class _FirstScreenState extends State<HomeScreen> {
+
+class _HomeScreenState extends State<HomeScreen> {
   final double _containerHeight = 100.0;
   final Color _container1Color = const Color.fromARGB(255, 15, 11, 128);
   final Color _container2Color = const Color.fromARGB(255, 7, 56, 96);
   void _navigateTo(String route) {
     Navigator.pushNamed(context, route);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,7 +58,6 @@ class _FirstScreenState extends State<HomeScreen> {
         ),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
-       
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
@@ -74,8 +73,7 @@ class _FirstScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               GestureDetector(
-                onTap: () =>
-                    _navigateTo('/customer'), 
+                onTap: () => _navigateTo('/customer'),
                 child: AnimatedContainer(
                   duration: const Duration(seconds: 1),
                   height: _containerHeight,
@@ -137,7 +135,7 @@ class _FirstScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 20),
               GestureDetector(
-                onTap: () => _navigateTo('/view'), 
+                onTap: () => _navigateTo('/view'),
                 child: AnimatedContainer(
                   duration: const Duration(seconds: 1),
                   height: _containerHeight,
@@ -266,7 +264,7 @@ class ProductManagement extends StatelessWidget {
                     },
                   ),
                 ),
-              const  SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 SizedBox(
@@ -287,4 +285,3 @@ class ProductManagement extends StatelessWidget {
     );
   }
 }
-

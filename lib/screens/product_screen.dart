@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:order_taking_app/Models/product.dart';
 import 'package:order_taking_app/common.dart';
+
 class AddProducts extends StatefulWidget {
   const AddProducts({super.key});
   @override
   State<AddProducts> createState() => _AddProductsState();
 }
+
 class _AddProductsState extends State<AddProducts> {
   final TextEditingController _productNameController = TextEditingController();
   final TextEditingController _productPriceController = TextEditingController();
@@ -21,7 +23,7 @@ class _AddProductsState extends State<AddProducts> {
             TextButton(
               child: const Text('OK'),
               onPressed: () {
-                Navigator.of(context).pop(); 
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -29,6 +31,7 @@ class _AddProductsState extends State<AddProducts> {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,40 +52,31 @@ class _AddProductsState extends State<AddProducts> {
                 controller: _productNameController,
                 decoration: const InputDecoration(
                   labelText: 'Product Name',
-                  labelStyle: TextStyle(
-                      color: Colors.white),
+                  labelStyle: TextStyle(color: Colors.white),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                    borderSide: BorderSide(
-                        color:
-                            Colors.white), 
+                    borderSide: BorderSide(color: Colors.white),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                    borderSide: BorderSide(
-                        color:
-                            Colors.white), 
+                    borderSide: BorderSide(color: Colors.white),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              TextField(style: TextStyle(color: Colors.white),
+              TextField(
+                style: TextStyle(color: Colors.white),
                 controller: _productPriceController,
                 decoration: const InputDecoration(
                   labelText: 'Price',
-                  labelStyle: TextStyle(
-                      color: Colors.white),
-                enabledBorder: OutlineInputBorder(
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                    borderSide: BorderSide(
-                        color:
-                            Colors.white), 
+                    borderSide: BorderSide(color: Colors.white),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                    borderSide: BorderSide(
-                        color:
-                            Colors.white), 
+                    borderSide: BorderSide(color: Colors.white),
                   ),
                 ),
               ),
@@ -92,19 +86,14 @@ class _AddProductsState extends State<AddProducts> {
                 controller: _stockController,
                 decoration: const InputDecoration(
                   labelText: 'Stock',
-                  labelStyle: TextStyle(
-                      color: Colors.white),
-                   enabledBorder: OutlineInputBorder(
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                    borderSide: BorderSide(
-                        color:
-                            Colors.white), 
+                    borderSide: BorderSide(color: Colors.white),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                    borderSide: BorderSide(
-                        color:
-                            Colors.white), 
+                    borderSide: BorderSide(color: Colors.white),
                   ),
                 ),
               ),
@@ -114,11 +103,12 @@ class _AddProductsState extends State<AddProducts> {
                   final productName = _productNameController.text;
                   final productPrice = _productPriceController.text;
                   final stock = _stockController.text;
-                   if (productName.isEmpty ||
+                  if (productName.isEmpty ||
                       productPrice.isEmpty ||
                       stock.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please fill in all fields.')),
+                      const SnackBar(
+                          content: Text('Please fill in all fields.')),
                     );
                     return;
                   }
@@ -134,16 +124,18 @@ class _AddProductsState extends State<AddProducts> {
     );
   }
 }
+
 class UpdateStock extends StatefulWidget {
   const UpdateStock({super.key});
   @override
   State<UpdateStock> createState() => _UpdateStockState();
 }
+
 class _UpdateStockState extends State<UpdateStock> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:const CommonAppBar(),
+      appBar: const CommonAppBar(),
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
@@ -167,17 +159,28 @@ class _UpdateStockState extends State<UpdateStock> {
                 itemBuilder: (context, index) {
                   final product = products[index];
                   return Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 16.0),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey, width: 1.0),
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     child: ListTile(
-                      leading: Text(product.productId.toString(),style: TextStyle(color: Colors.white),),
-                      title: Text(product.productName,style: TextStyle(color: Colors.white),),
-                      subtitle: Text('Stock: ${product.stock}',style: TextStyle(color: Colors.white),),
+                      leading: Text(
+                        product.productId.toString(),
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      title: Text(
+                        product.productName,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      subtitle: Text(
+                        'Stock: ${product.stock}',
+                        style: TextStyle(color: Colors.white),
+                      ),
                       trailing: IconButton(
-                        icon: const Icon(Icons.edit),color: const Color.fromARGB(248, 234, 238, 239),
+                        icon: const Icon(Icons.edit),
+                        color: const Color.fromARGB(248, 234, 238, 239),
                         onPressed: () {
                           _showUpdateDialog(product);
                         },
@@ -192,8 +195,10 @@ class _UpdateStockState extends State<UpdateStock> {
       ),
     );
   }
+
   void _showUpdateDialog(Product product) {
-    final TextEditingController stockController = TextEditingController(text: product.stock.toString());
+    final TextEditingController stockController =
+        TextEditingController(text: product.stock.toString());
     showDialog(
       context: context,
       builder: (context) {
@@ -208,45 +213,41 @@ class _UpdateStockState extends State<UpdateStock> {
             TextButton(
               onPressed: () async {
                 int? stock = int.tryParse(stockController.text);
-                if (stock == null || stock < 0) { 
+                if (stock == null || stock < 0) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter a valid stock quantity.')),
+                    const SnackBar(
+                        content: Text('Please enter a valid stock quantity.')),
                   );
                   return;
-                }         
+                }
                 showDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (context) => const Center(child: CircularProgressIndicator()),
+                  builder: (context) =>
+                      const Center(child: CircularProgressIndicator()),
                 );
                 try {
-                  await updateStock(product.productId,product.productName,stock); 
-                  Navigator.of(context).pop(); 
-                  Navigator.of(context).pop(); 
+                  await updateStock(
+                      product.productId, product.productName, stock);
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                   setState(() {});
                 } catch (e) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Stock updated')),
-                    
-                    
                   );
                 }
               },
-              
               child: const Text('Update'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                
               },
-              
               child: const Text('Cancel'),
             ),
-            
           ],
-          
         );
       },
     );

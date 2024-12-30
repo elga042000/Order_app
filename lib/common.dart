@@ -15,22 +15,18 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       centerTitle: true,
-      
       backgroundColor: Colors.blueAccent,
-       actions: [
+      actions: [
         IconButton(
           icon: const Icon(Icons.home),
           onPressed: () {
-          
-            Navigator.pushNamed(context, '/'); 
+            Navigator.pushNamed(context, '/');
           },
         ),
       ],
-    );  
-    
+    );
   }
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
-

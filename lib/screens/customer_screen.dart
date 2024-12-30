@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:order_taking_app/Models/customer.dart';
+import 'package:order_taking_app/Models/order.dart';
 import 'package:order_taking_app/common.dart';
 import 'package:order_taking_app/screens/order_screen.dart';
 
@@ -147,6 +148,21 @@ class ViewCustomers extends StatefulWidget {
 }
 
 class _ViewCustomersState extends State<ViewCustomers> {
+  DateTime? selectedDate;
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -169,242 +185,366 @@ class _ViewCustomersState extends State<ViewCustomers> {
               return const Center(child: Text('No customers found.'));
             } else {
               final customers = snapshot.data!;
-              return ListView.builder(
-                itemCount: customers.length,
-                itemBuilder: (context, index) {
-                  final customer = customers[index];
-                  return Container(
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 16.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: const Color.fromARGB(255, 116, 141, 178),
-                          width: 1.0),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: ListTile(
-                      leading: Text(
-                        customer.customerId?.toString() ?? 'N/A',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      title: Text(
-                        customer.customerName,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      subtitle: Text(
-                        customer.customerCity,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            color: Colors.cyan,
-                            onPressed: () async {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditCustomerScreen(
-                                    customerId: customer.customerId!,
-                                    customerName: customer.customerName,
-                                    customerCity: customer.customerCity,
-                                    phoneNumber: customer.phoneNumber,
-                                  ),
-                                ),
-                              );
-                            },
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  IconButton(
+                    icon: Icon(Icons
+                        .calendar_today,color: const Color.fromARGB(255, 169, 232, 169),), 
+                    onPressed: () => _selectDate(context),
+                    tooltip: 'Select date',
+                  ),
+                  
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: customers.length,
+                      itemBuilder: (context, index) {
+                        final customer = customers[index];
+                        return Container(
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 16.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                color: const Color.fromARGB(255, 116, 141, 178),
+                                width: 1.0),
+                            borderRadius: BorderRadius.circular(8.0),
                           ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete,
-                              color: Color.fromARGB(255, 177, 81, 74),
+                          child: ListTile(
+                            leading: Text(
+                              customer.customerId?.toString() ?? 'N/A',
+                              style: const TextStyle(color: Colors.white),
                             ),
-                            onPressed: () async {
-                              bool? confirmDelete = await showDialog<bool>(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text('Delete Customer'),
-                                    content: const Text(
-                                        'Are you sure you want to delete this customer?'),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.of(context).pop(false),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.of(context).pop(true),
-                                        child: const Text('Delete'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                              if (confirmDelete == true) {
-                                try {
-                                  await deleteCustomer(customer.customerId!);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            'Customer deleted successfully!')),
-                                  );
-                                  setState(() {});
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text(
-                                            'Failed to delete customer: $e')),
-                                  );
-                                }
-                              }
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.shopping_basket,
-                              color: Colors.lightGreen,
+                            title: Text(
+                              customer.customerName,
+                              style: const TextStyle(color: Colors.white),
                             ),
-                            onPressed: () async {
-                             
-                              if (customer.customerId == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'Customer ID or name is missing')),
-                                );
-                                return;
-                              }
-
-                            
-                              showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (BuildContext context) {
-                                  return const AlertDialog(
-                                    title: Text('Loading Orders...'),
-                                    content: Center(
-                                        child: CircularProgressIndicator()),
-                                  );
-                                },
-                              );
-
-                              try {
-                                List<custOrder> orders =
-                                    await fetchOrders(customer.customerId!);
-                                Navigator.of(context)
-                                    .pop(); 
-
-                               
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text(
-                                          'Orders for ${customer.customerName}'),
-                                      content: SizedBox(
-                                        width: double.maxFinite,
-                                        child: ListView(
-                                          children:
-                                              orders.map((custOrder order) {
-                                            return ListTile(
-                                              title: Text(
-                                                  'Order ID: ${order.orderId}'),
-                                              subtitle: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  ...order.orderDetails
-                                                      .map((detail) {
-                                                    return Text(
-                                                      'Product ID: ${detail.productId}, Quantity: ${detail.quantity}, Net Amount: ${detail.totalAmount}',
-                                                    );
-                                                  }).toList(),
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    'Total Amount: ${order.netAmount}',
-                                                    style: const TextStyle(
-                                                        color: Colors.green,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    'Date: ${order.orderDate}',
-                                                    style: const TextStyle(
-                                                        color: Colors.grey),
-                                                  ),
-                                                ],
-                                              ),
-                                              trailing: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  IconButton(
-                                                    onPressed: () {
-                                                     
-                                                      if (order.orderDetails
-                                                          .isNotEmpty) {
-                                                       
-                                                        Navigator.of(context)
-                                                            .push(
-                                                          MaterialPageRoute(
-                                                            builder:
-                                                                (context) =>
-                                                                    EditScreen(
-                                                                    
-                                                              orderDetails: order.orderDetails,
-                                                                  customerId:order.customerId ,
-                                                                  orderId: order.orderId, 
-                                                            ),
-                                                          ),
-                                                        );
-                                                      } else {
-                                                        ScaffoldMessenger.of(
-                                                                context)
-                                                            .showSnackBar(
-                                                          const SnackBar(
-                                                              content: Text(
-                                                                  'No order details available')),
-                                                        );
-                                                      }
-                                                    },
-                                                    icon:
-                                                        const Icon(Icons.edit,color: Color.fromARGB(255, 23, 65, 164),),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          }).toList(),
+                            subtitle: Text(
+                              customer.customerCity,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  color:
+                                      const Color.fromARGB(255, 134, 217, 228),
+                                  onPressed: () async {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            EditCustomerScreen(
+                                          customerId: customer.customerId!,
+                                          customerName: customer.customerName,
+                                          customerCity: customer.customerCity,
+                                          phoneNumber: customer.phoneNumber,
                                         ),
                                       ),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.of(context).pop(),
-                                          child: const Text('Close'),
-                                        ),
-                                      ],
                                     );
                                   },
-                                );
-                              } catch (e) {
-                                Navigator.of(context)
-                                    .pop(); 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content:
-                                          Text('Failed to load orders: $e')),
-                                );
-                              }
-                            },
-                          )
-                        ],
-                      ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Color.fromARGB(255, 204, 70, 60),
+                                  ),
+                                  onPressed: () async {
+                                    bool? confirmDelete =
+                                        await showDialog<bool>(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: const Text('Delete Customer'),
+                                          content: const Text(
+                                              'Are you sure you want to delete this customer?'),
+                                          actions: <Widget>[
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.of(context)
+                                                      .pop(false),
+                                              child: const Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.of(context)
+                                                      .pop(true),
+                                              child: const Text('Delete'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                    if (confirmDelete == true) {
+                                      try {
+                                        await deleteCustomer(
+                                            customer.customerId!);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Customer deleted successfully!')),
+                                        );
+                                        setState(() {});
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content: Text(
+                                                  'Failed to delete customer: $e')),
+                                        );
+                                      }
+                                    }
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.shopping_basket,
+                                    color: Color.fromARGB(255, 188, 222, 148),
+                                  ),
+                                  onPressed: () async {
+                                    if (customer.customerId == null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Customer ID or name is missing')),
+                                      );
+                                      return;
+                                    }
+                                    //  await _selectDate(context);
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (BuildContext context) {
+                                        return const AlertDialog(
+                                          title: Text('Loading Orders...'),
+                                          content: Center(
+                                              child:
+                                                  CircularProgressIndicator()),
+                                        );
+                                      },
+                                    );
+
+                                    try {
+                                      List<custOrder> orders =
+                                          await fetchOrders(
+                                              customer.customerId!);
+                                      Navigator.of(context).pop();
+                                      //filtering order based on date
+                                      if (selectedDate != null) {
+                                        orders = orders.where((order) {
+                                          final orderDate =
+                                              DateTime.parse(order.orderDate);
+                                          return orderDate.year ==
+                                                  selectedDate!.year &&
+                                              orderDate.month ==
+                                                  selectedDate!.month &&
+                                              orderDate.day ==
+                                                  selectedDate!.day;
+                                        }).toList();
+                                      }
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text(
+                                                'Orders for ${customer.customerName}'),
+                                            content: SizedBox(
+                                              width: double.maxFinite,
+                                              child: ListView(
+                                                children: orders
+                                                    .map((custOrder order) {
+                                                  return ListTile(
+                                                    title: Text(
+                                                        'Order ID: ${order.orderId}'),
+                                                    subtitle: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        ...order.orderDetails
+                                                            .map((detail) {
+                                                          return Text(
+                                                            'Product ID: ${detail.productId}, Quantity: ${detail.quantity}, Net Amount: ${detail.totalAmount}',
+                                                          );
+                                                        }).toList(),
+                                                        const SizedBox(
+                                                            height: 4),
+                                                        Text(
+                                                          'Total Amount: ${order.netAmount}',
+                                                          style: const TextStyle(
+                                                              color:
+                                                                  Colors.green,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                        const SizedBox(
+                                                            height: 4),
+                                                        Text(
+                                                          'Date: ${order.orderDate}',
+                                                          style:
+                                                              const TextStyle(
+                                                                  color: Colors
+                                                                      .grey),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    trailing: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        IconButton(
+                                                          onPressed: () {
+                                                            if (order
+                                                                .orderDetails
+                                                                .isNotEmpty) {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .push(
+                                                                MaterialPageRoute(
+                                                                  builder:
+                                                                      (context) =>
+                                                                          EditScreen(
+                                                                    orderDetails:
+                                                                        order
+                                                                            .orderDetails,
+                                                                    customerId:
+                                                                        order
+                                                                            .customerId,
+                                                                    orderId: order
+                                                                        .orderId,
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            } else {
+                                                              ScaffoldMessenger
+                                                                      .of(context)
+                                                                  .showSnackBar(
+                                                                const SnackBar(
+                                                                    content: Text(
+                                                                        'No order details available')),
+                                                              );
+                                                            }
+                                                          },
+                                                          icon: const Icon(
+                                                            Icons.edit,
+                                                            color:
+                                                                Color.fromARGB(
+                                                                    255,
+                                                                    23,
+                                                                    65,
+                                                                    164),
+                                                          ),
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(
+                                                            Icons.delete,
+                                                            color:
+                                                                Color.fromARGB(
+                                                                    255,
+                                                                    204,
+                                                                    70,
+                                                                    60),
+                                                          ),
+                                                          onPressed: () async {
+                                                            bool?
+                                                                confirmDelete =
+                                                                await showDialog<
+                                                                    bool>(
+                                                              context: context,
+                                                              builder:
+                                                                  (BuildContext
+                                                                      context) {
+                                                                return AlertDialog(
+                                                                  title: const Text(
+                                                                      'Delete Order'),
+                                                                  content:
+                                                                      const Text(
+                                                                          'Are you sure you want to delete this order?'),
+                                                                  actions: <Widget>[
+                                                                    TextButton(
+                                                                      onPressed:
+                                                                          () =>
+                                                                              Navigator.of(context).pop(false),
+                                                                      child: const Text(
+                                                                          'Cancel'),
+                                                                    ),
+                                                                    TextButton(
+                                                                      onPressed:
+                                                                          () =>
+                                                                              Navigator.of(context).pop(true),
+                                                                      child: const Text(
+                                                                          'Delete'),
+                                                                    ),
+                                                                  ],
+                                                                );
+                                                              },
+                                                            );
+                                                            if (confirmDelete ==
+                                                                true) {
+                                                              try {
+                                                                await deleteOrder(
+                                                                    order
+                                                                        .orderId);
+                                                                ScaffoldMessenger.of(
+                                                                        context)
+                                                                    .showSnackBar(
+                                                                  const SnackBar(
+                                                                      content: Text(
+                                                                          'Order deleted successfully!')),
+                                                                );
+                                                                setState(() {});
+                                                              } catch (e) {
+                                                                ScaffoldMessenger.of(
+                                                                        context)
+                                                                    .showSnackBar(
+                                                                  SnackBar(
+                                                                      content: Text(
+                                                                          'Failed to delete order: $e')),
+                                                                );
+                                                              }
+                                                            }
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                }).toList(),
+                                              ),
+                                            ),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.of(context).pop(),
+                                                child: const Text('Close'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    } catch (e) {
+                                      Navigator.of(context).pop();
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Failed to load orders: $e')),
+                                      );
+                                    }
+                                  },
+                                )
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
+                  ),
+                ],
               );
             }
           },
@@ -468,7 +608,6 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
     try {
       await updateCustomer(
           widget.customerId, customerName, customerCity, phoneNumber);
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Customer updated successfully!')),
       );
