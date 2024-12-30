@@ -14,5 +14,6 @@ A new Flutter project.
 ![update_stock](https://github.com/user-attachments/assets/f2e8df44-2767-4620-b28f-b712d457f2f1)
 ![view_customers](https://github.com/user-attachments/assets/bfc4eb73-1b05-4ded-9efc-36a8099b77b7)
 ![view_products](https://github.com/user-attachments/assets/423a1815-e42d-49f5-b30f-bc033dab3088)
-![Screenshot (344)](https://github.com/user-attachments/assets/d10be0dc-a900-4bb4-969d-594704d9b5eb)
 ![Screenshot (343)](https://github.com/user-attachments/assets/ce428448-51f0-41f1-83b0-2a942b279b74)
+![Screenshot (345)](https://github.com/user-attachments/assets/365494eb-ee2d-417a-bcf1-1bb4f687f131)
+
